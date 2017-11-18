@@ -1,0 +1,84 @@
+﻿<UserControl x:Class="WpfPrismApp.PersonModule.Views.PersonListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:forms="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+             xmlns:views="clr-namespace:WpfPrismApp.PersonModule.Views"
+             xmlns:viewModels="clr-namespace:WpfPrismApp.PersonModule.ViewModels"
+             prism:ViewModelLocator.AutoWireViewModel="True">
+    <UserControl.Resources>
+        <viewModels:NullToCollapseConverter x:Key="NullToCollapseConverter"/>
+    </UserControl.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding ViewLoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid x:Name="MainContainer" Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <DataGrid Grid.Row="0" 
+                  Name="PersonDataGrid" 
+                  ItemsSource="{Binding ObservablePersonList}"
+                  CanUserAddRows="True"
+                  CanUserDeleteRows="True"
+                  CanUserSortColumns="True"
+                  CanUserReorderColumns="True"
+                  AlternatingRowBackground="WhiteSmoke"
+                  AutoGenerateColumns="False"
+                  ColumnWidth="Auto"
+                  CellEditEnding="PersonDataGrid_OnCellEditEnding">
+            <DataGrid.RowValidationRules>
+                <views:PersonValidationRule ValidationStep="UpdatedValue"/>
+            </DataGrid.RowValidationRules>
+            <DataGrid.RowValidationErrorTemplate>
+                <ControlTemplate>
+                    <Grid Margin="3,0,3,0" ToolTip="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGridRow}}, Path=(Validation.Errors)[0].ErrorContent}">
+                        <Ellipse StrokeThickness="0" Fill="Red" Width="{TemplateBinding FontSize}" Height="{TemplateBinding FontSize}" />
+                        <TextBlock Text="!" FontSize="{TemplateBinding FontSize}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"  />
+                    </Grid>
+                </ControlTemplate>
+            </DataGrid.RowValidationErrorTemplate>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="FirstName" Binding="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Width="*"/>
+                <DataGridTextColumn Header="LastName" Binding="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Width="*"/>
+                <DataGridTextColumn Header="StreetName" Binding="{Binding StreetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" Width="*"/>
+                <DataGridTextColumn Header="HouseNumber" Binding="{Binding HouseNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                <DataGridTextColumn Header="ApartmentNumber" Binding="{Binding ApartmentNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <DataGridTextColumn Header="PostalCode" Binding="{Binding PostalCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                <DataGridTextColumn Header="PhoneNumber" Binding="{Binding PhoneNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"/>
+                <DataGridTemplateColumn Header="DayOfBirth">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DayOfBirth, Mode=TwoWay, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <DatePicker SelectedDate="{Binding DayOfBirth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" BorderThickness="0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Age" Binding="{Binding Age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}" IsReadOnly="True" />
+                <DataGridTemplateColumn IsReadOnly="True" Width="55">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Remove" Visibility="{Binding Converter={StaticResource NullToCollapseConverter}}" Command="{Binding DataContext.RemoveRowCommand, RelativeSource={RelativeSource AncestorType=views:PersonListView}}" CommandParameter="{Binding}" Foreground="Red" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <GridSplitter Height="10" Grid.Row="1"/>
+        <WrapPanel HorizontalAlignment="Right" Grid.Row="2">
+            <Button Command="{Binding SaveCommand}" IsEnabled="{Binding PersonListChanged}" Content="Save" Width="75" Margin="0,0,10,0"/>
+            <Button Command="{Binding CancelCommand}" Content="Cancel" Width="75"/>
+        </WrapPanel>
+    </Grid>
+</UserControl>
